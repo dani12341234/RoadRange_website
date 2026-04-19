@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road Range</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f0f11;
+  --panel: #17171a;
+  --panel2: #1e1e23;
+  --border: rgba(255,255,255,0.07);
+  --text: #e8e6e0;
+  --muted: #7a7870;
+  --accent: oklch(72% 0.18 48);
+  --accent2: oklch(72% 0.18 185);
+  --danger: oklch(65% 0.18 15);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 10px;
+}
+
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); }
+
+#app { display: flex; height: 100vh; width: 100vw; }
+
+/* ── SIDEBAR ──────────────────────────────── */
+#sidebar {
+  width: 320px; min-width: 320px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 1000; overflow: hidden;
+}
+
+.s-header { padding: 24px 22px 18px; border-bottom: 1px solid var(--border); }
+.s-logo { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.s-title { font-size: 20px; font-weight: 600; }
+.s-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-weight: 300; }
+
+.s-body { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 18px; }
+.s-body::-webkit-scrollbar { width: 3px; }
+.s-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ── FIELDS ───────────────────────────────── */
+.field-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+
+.search-wrap { position: relative; }
+.search-wrap input {
+  width: 100%; background: var(--panel2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: var(--font);
+  font-size: 13px; padding: 10px 36px 10px 12px; outline: none; transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap input::placeholder { color: var(--muted); }
+.search-btn {
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  padding: 4px; display: flex; align-items: center; transition: color 0.2s;
+}
+.search-btn:hover { color: var(--accent); }
+.search-results {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.sri { padding: 9px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+.sri:last-child { border-bottom: none; }
+.sri:hover { background: rgba(255,255,255,0.04); }
+.sri .pn { color: var(--text); }
+.sri .pd { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+/* ── SLIDER ───────────────────────────────── */
+.km-display { display: flex; align-items: baseline; gap: 5px; margin-bottom: 10px; }
+.km-number { font-family: var(--mono); font-size: 44px; font-weight: 300; color: var(--accent); line-height: 1; }
+.km-unit { font-size: 14px; color: var(--muted); font-weight: 300; }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 3px;
+  background: var(--panel2); border-radius: 2px; outline: none; cursor: pointer; border: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.5); transition: transform 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.km-presets { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+.km-preset {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); font-family: var(--mono); font-size: 10px;
+  padding: 4px 9px; border-radius: 5px; cursor: pointer; transition: all 0.12s;
+}
+.km-preset:hover, .km-preset.active { border-color: var(--accent); color: var(--accent); background: rgba(200,140,60,0.07); }
+
+/* ── TRAVEL MODE ──────────────────────────── */
+.mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.mode-btn {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 9px 5px; cursor: pointer; text-align: center; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.mode-btn.active { border-color: var(--accent2); background: rgba(60,180,160,0.07); }
+.mode-icon { font-size: 17px; }
+.mode-label { font-size: 10px; color: var(--muted); }
+.mode-btn.active .mode-label { color: var(--accent2); }
+
+/* ── METRICS ──────────────────────────────── */
+.metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+.metric {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 10px 9px; text-align: center;
+}
+.metric-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.metric-val { font-family: var(--mono); font-size: 18px; font-weight: 400; color: var(--text); }
+.metric-val.cyan { color: var(--accent2); }
+.metric-val.amber { color: var(--accent); }
+
+/* ── STATUS ───────────────────────────────── */
+.status-bar {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 9px 12px; font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; gap: 7px; min-height: 38px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--muted); }
+.status-dot.ready { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+.status-dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+.status-dot.error { background: var(--danger); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.progress-bar {
+  height: 2px; background: var(--panel2); border-radius: 1px; overflow: hidden; margin-top: -6px;
+}
+.progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.3s; width: 0%; }
+
+/* ── GO BUTTON ────────────────────────────── */
+.go-btn {
+  width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: var(--radius);
+  cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: #1a1000; letter-spacing: 0.04em; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.go-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,140,60,0.3); }
+.go-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.go-btn.loading::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+.info-note {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 11px; color: var(--muted); line-height: 1.5;
+}
+
+/* ── MAP ──────────────────────────────────── */
+#map-wrap { flex: 1; position: relative; }
+#map { width: 100%; height: 100%; }
+
+.map-hint {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(15,15,17,0.8); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 22px; font-size: 14px; color: var(--muted);
+  pointer-events: none; z-index: 900; text-align: center; line-height: 1.6;
+}
+
+.clear-btn {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(15,15,17,0.85); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: 7px;
+  color: var(--muted); font-family: var(--font); font-size: 11px;
+  padding: 6px 12px; cursor: pointer; display: none; z-index: 900; transition: all 0.15s;
+}
+.clear-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ── LEAFLET ──────────────────────────────── */
+.leaflet-container { background: #080809; }
+.leaflet-control-zoom { border: 1px solid var(--border) !important; box-shadow: none !important; }
+.leaflet-control-zoom a { background: rgba(15,15,17,0.9) !important; color: var(--text) !important; border-bottom: 1px solid var(--border) !important; }
+.leaflet-control-zoom a:hover { background: var(--panel2) !important; }
+.leaflet-control-attribution { background: rgba(15,15,17,0.7) !important; color: var(--muted) !important; font-size: 9px !important; }
+.leaflet-control-attribution a { color: var(--muted) !important; }
+
+.city-label { font-size: 10px; font-weight: 500; font-family: 'DM Sans', sans-serif; color: #e8e6e0; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7); white-space: nowrap; pointer-events: none; }
+.city-label.reachable { color: oklch(72% 0.18 185) !important; font-weight: 600; }
+.city-label.dim { color: #5a5855 !important; }
+.leaflet-tooltip { background: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+.leaflet-tooltip::before { display: none !important; }
+
+/* ── TWEAKS ───────────────────────────────── */
+#tweaks-panel {
+  display: none; position: fixed; bottom: 22px; left: 338px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; z-index: 2000; width: 240px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+#tweaks-panel h3 { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+.tweak-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.tweak-row label { font-size: 11px; color: var(--text); }
+.tweak-row input[type=color] { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--border); cursor: pointer; background: none; padding: 2px; }
+.tweak-row select { background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: 5px; font-size: 11px; padding: 3px 7px; outline: none; cursor: pointer; }
+.tweak-row input[type=range] { width: 90px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="s-header">
+      <div class="s-logo">Road Range</div>
+      <div class="s-title">Reachability Map</div>
+      <div class="s-sub">Where can you get to from here?</div>
+    </div>
+    <div class="s-body">
+
+      <div>
+        <div class="field-label">Starting point</div>
+        <div class="search-wrap" id="search-wrap">
+          <input type="text" id="search-input" placeholder="Search a place…" autocomplete="off">
+          <button class="search-btn" id="search-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </button>
+          <div class="search-results" id="search-results" style="display:none"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Or click anywhere on the map</div>
+      </div>
+
+      <div>
+        <div class="field-label">Maximum distance</div>
+        <div class="km-display">
+          <span class="km-number" id="km-display">200</span>
+          <span class="km-unit">km</span>
+        </div>
+        <input type="range" id="km-slider" min="1" max="3000" value="200" step="1">
+        <div class="km-presets">
+          <button class="km-preset" data-km="50">50</button>
+          <button class="km-preset" data-km="100">100</button>
+          <button class="km-preset active" data-km="200">200</button>
+          <button class="km-preset" data-km="500">500</button>
+          <button class="km-preset" data-km="1000">1000</button>
+          <button class="km-preset" data-km="2000">2000</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Travel mode</div>
+        <div class="mode-grid">
+          <button class="mode-btn active" data-mode="driving-car" data-osrm="driving">
+            <span class="mode-icon">🚗</span><span class="mode-label">Car</span>
+          </button>
+          <button class="mode-btn" data-mode="cycling-regular" data-osrm="cycling">
+            <span class="mode-icon">🚴</span><span class="mode-label">Cycling</span>
+          </button>
+          <button class="mode-btn" data-mode="foot-walking" data-osrm="foot">
+            <span class="mode-icon">🚶</span><span class="mode-label">Walking</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Summary</div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Cities</div>
+            <div class="metric-val cyan" id="m-cities">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Farthest</div>
+            <div class="metric-val amber" id="m-farthest">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Drive time</div>
+            <div class="metric-val" id="m-time">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+      <div class="status-bar" id="status-bar">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Set a starting point to begin</span>
+      </div>
+
+      <button class="go-btn" id="go-btn" disabled>Calculate Reachable Area</button>
+
+      <div class="info-note">
+        <svg width="12" height="12" fill="none" stroke="var(--accent2)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>OSRM + Valhalla / OSM — no API key. Road isochrone ≤150 km, circle beyond.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div class="map-hint" id="map-hint">Click to place your starting point</div>
+    <button class="clear-btn" id="clear-btn">✕ Clear</button>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<div id="tweaks-panel">
+  <h3>Tweaks</h3>
+  <div class="tweak-row"><label>Fill color</label><input type="color" id="tw-fill" value="#f09a38"></div>
+  <div class="tweak-row"><label>Fill opacity</label><input type="range" id="tw-opacity" min="0.02" max="0.4" step="0.01" value="0.08"></div>
+  <div class="tweak-row"><label>Map style</label>
+    <select id="tw-map-style"><option value="dark">Dark</option><option value="topo">Topo</option><option value="satellite">Satellite</option></select>
+  </div>
+  <div class="tweak-row"><label>Route lines</label>
+    <select id="tw-routes"><option value="1">Show</option><option value="0">Hide</option></select>
+  </div>
+</div>
+
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "fillColor": "#f09a38",
+  "fillOpacity": 0.08,
+  "mapStyle": "dark",
+  "showRoutes": true
+}/*EDITMODE-END*/;
+let tweaks = { ...TWEAK_DEFAULTS };
+
+// ── CITY DATABASE ──────────────────────────────────────────────────────────
+const cities = [
+  // T1 — Capitals & megacities
+  {n:"London",lat:51.507,lng:-0.128,t:1},{n:"Paris",lat:48.857,lng:2.352,t:1},
+  {n:"Berlin",lat:52.520,lng:13.405,t:1},{n:"Madrid",lat:40.417,lng:-3.704,t:1},
+  {n:"Rome",lat:41.902,lng:12.496,t:1},{n:"Vienna",lat:48.208,lng:16.374,t:1},
+  {n:"Amsterdam",lat:52.370,lng:4.895,t:1},{n:"Brussels",lat:50.850,lng:4.352,t:1},
+  {n:"Prague",lat:50.076,lng:14.438,t:1},{n:"Budapest",lat:47.498,lng:19.040,t:1},
+  {n:"Warsaw",lat:52.230,lng:21.012,t:1},{n:"Lisbon",lat:38.722,lng:-9.139,t:1},
+  {n:"Copenhagen",lat:55.676,lng:12.568,t:1},{n:"Stockholm",lat:59.329,lng:18.069,t:1},
+  {n:"Oslo",lat:59.914,lng:10.752,t:1},{n:"Helsinki",lat:60.170,lng:24.941,t:1},
+  {n:"Athens",lat:37.984,lng:23.728,t:1},{n:"Dublin",lat:53.350,lng:-6.260,t:1},
+  {n:"Bucharest",lat:44.426,lng:26.103,t:1},{n:"Kyiv",lat:50.450,lng:30.524,t:1},
+  {n:"Istanbul",lat:41.009,lng:28.978,t:1},{n:"Ankara",lat:39.934,lng:32.864,t:1},
+  {n:"Minsk",lat:53.900,lng:27.567,t:1},
+  // T2 — Major
+  {n:"Barcelona",lat:41.386,lng:2.170,t:2},{n:"Milan",lat:45.464,lng:9.190,t:2},
+  {n:"Munich",lat:48.135,lng:11.582,t:2},{n:"Zurich",lat:47.377,lng:8.542,t:2},
+  {n:"Hamburg",lat:53.551,lng:9.994,t:2},{n:"Lyon",lat:45.764,lng:4.836,t:2},
+  {n:"Sofia",lat:42.697,lng:23.322,t:2},{n:"Zagreb",lat:45.815,lng:15.982,t:2},
+  {n:"Belgrade",lat:44.787,lng:20.457,t:2},{n:"Bratislava",lat:48.149,lng:17.107,t:2},
+  {n:"Tallinn",lat:59.437,lng:24.754,t:2},{n:"Riga",lat:56.950,lng:24.106,t:2},
+  {n:"Vilnius",lat:54.687,lng:25.280,t:2},{n:"Edinburgh",lat:55.953,lng:-3.189,t:2},
+  {n:"Marseille",lat:43.296,lng:5.370,t:2},{n:"Frankfurt",lat:50.111,lng:8.682,t:2},
+  {n:"Krakow",lat:50.065,lng:19.945,t:2},{n:"Gdansk",lat:54.352,lng:18.647,t:2},
+  {n:"Naples",lat:40.852,lng:14.268,t:2},{n:"Thessaloniki",lat:40.640,lng:22.944,t:2},
+  {n:"Porto",lat:41.158,lng:-8.629,t:2},{n:"Seville",lat:37.389,lng:-5.984,t:2},
+  {n:"Valencia",lat:39.470,lng:-0.376,t:2},{n:"Sarajevo",lat:43.856,lng:18.413,t:2},
+  {n:"Tirana",lat:41.328,lng:19.818,t:2},{n:"Ljubljana",lat:46.056,lng:14.508,t:2},
+  // T3 — Medium
+  {n:"Cologne",lat:50.938,lng:6.960,t:3},{n:"Bordeaux",lat:44.838,lng:-0.579,t:3},
+  {n:"Nice",lat:43.710,lng:7.262,t:3},{n:"Florence",lat:43.770,lng:11.249,t:3},
+  {n:"Venice",lat:45.440,lng:12.316,t:3},{n:"Gothenburg",lat:57.709,lng:11.975,t:3},
+  {n:"Malmö",lat:55.605,lng:13.000,t:3},{n:"Nuremberg",lat:49.452,lng:11.077,t:3},
+  {n:"Stuttgart",lat:48.776,lng:9.183,t:3},{n:"Düsseldorf",lat:51.228,lng:6.773,t:3},
+  {n:"Strasbourg",lat:48.574,lng:7.752,t:3},{n:"Geneva",lat:46.205,lng:6.144,t:3},
+  {n:"Innsbruck",lat:47.260,lng:11.394,t:3},{n:"Salzburg",lat:47.809,lng:13.055,t:3},
+  {n:"Graz",lat:47.070,lng:15.439,t:3},{n:"Cluj-Napoca",lat:46.770,lng:23.590,t:3},
+  {n:"Manchester",lat:53.483,lng:-2.244,t:3},{n:"Birmingham",lat:52.486,lng:-1.891,t:3},
+  {n:"Leeds",lat:53.800,lng:-1.549,t:3},{n:"Glasgow",lat:55.864,lng:-4.252,t:3},
+  {n:"Nantes",lat:47.218,lng:-1.554,t:3},{n:"Toulouse",lat:43.605,lng:1.444,t:3},
+  {n:"Lille",lat:50.629,lng:3.057,t:3},{n:"Antwerp",lat:51.221,lng:4.402,t:3},
+  {n:"Rotterdam",lat:51.924,lng:4.478,t:3},{n:"Wroclaw",lat:51.110,lng:17.033,t:3},
+  {n:"Poznan",lat:52.407,lng:16.930,t:3},{n:"Lodz",lat:51.760,lng:19.457,t:3},
+  {n:"Palermo",lat:38.116,lng:13.361,t:3},{n:"Turin",lat:45.070,lng:7.687,t:3},
+  {n:"Bologna",lat:44.494,lng:11.343,t:3},{n:"Genoa",lat:44.407,lng:8.934,t:3},
+  {n:"Bilbao",lat:43.263,lng:-2.935,t:3},{n:"Málaga",lat:36.721,lng:-4.421,t:3},
+  {n:"Zaragoza",lat:41.649,lng:-0.889,t:3},{n:"Bern",lat:46.948,lng:7.448,t:3},
+  {n:"Basel",lat:47.560,lng:7.589,t:3},{n:"Linz",lat:48.307,lng:14.286,t:3},
+  {n:"Timișoara",lat:45.749,lng:21.226,t:3},{n:"Iași",lat:47.159,lng:27.602,t:3},
+  {n:"Plovdiv",lat:42.150,lng:24.750,t:3},{n:"Constanța",lat:44.173,lng:28.638,t:3},
+  {n:"Lviv",lat:49.842,lng:24.032,t:3},{n:"Odesa",lat:46.483,lng:30.712,t:3},
+  {n:"Skopje",lat:41.997,lng:21.428,t:3},{n:"Podgorica",lat:42.441,lng:19.264,t:3},
+  {n:"Pristina",lat:42.663,lng:21.165,t:3},
+  // T4 — Small
+  {n:"Tatabánya",lat:47.569,lng:18.395,t:4},{n:"Debrecen",lat:47.532,lng:21.626,t:4},
+  {n:"Pécs",lat:46.072,lng:18.233,t:4},{n:"Győr",lat:47.684,lng:17.635,t:4},
+  {n:"Szeged",lat:46.253,lng:20.148,t:4},{n:"Miskolc",lat:48.103,lng:20.778,t:4},
+  {n:"Székesfehérvár",lat:47.186,lng:18.410,t:4},{n:"Nyíregyháza",lat:47.956,lng:21.717,t:4},
+  {n:"Kecskemét",lat:46.907,lng:19.691,t:4},{n:"Szombathely",lat:47.231,lng:16.622,t:4},
+  {n:"Eger",lat:47.903,lng:20.377,t:4},{n:"Veszprém",lat:47.093,lng:17.909,t:4},
+  {n:"Kaposvár",lat:46.360,lng:17.787,t:4},{n:"Sopron",lat:47.685,lng:16.590,t:4},
+  {n:"Brno",lat:49.195,lng:16.608,t:4},{n:"Ostrava",lat:49.836,lng:18.293,t:4},
+  {n:"Plzeň",lat:49.748,lng:13.378,t:4},{n:"Košice",lat:48.716,lng:21.261,t:4},
+  {n:"Žilina",lat:49.224,lng:18.740,t:4},{n:"Dresden",lat:51.051,lng:13.738,t:4},
+  {n:"Leipzig",lat:51.340,lng:12.375,t:4},{n:"Hanover",lat:52.376,lng:9.739,t:4},
+  {n:"Bremen",lat:53.079,lng:8.802,t:4},{n:"Dortmund",lat:51.514,lng:7.466,t:4},
+  {n:"Essen",lat:51.456,lng:7.012,t:4},{n:"Bonn",lat:50.737,lng:7.098,t:4},
+  {n:"Mainz",lat:50.000,lng:8.271,t:4},{n:"Mannheim",lat:49.489,lng:8.467,t:4},
+  {n:"Augsburg",lat:48.371,lng:10.898,t:4},{n:"Regensburg",lat:49.015,lng:12.097,t:4},
+  {n:"Rostock",lat:54.093,lng:12.099,t:4},{n:"Erfurt",lat:50.979,lng:11.028,t:4},
+  {n:"Kiel",lat:54.323,lng:10.123,t:4},{n:"Aachen",lat:50.776,lng:6.084,t:4},
+  {n:"Freiburg",lat:47.999,lng:7.842,t:4},{n:"Dijon",lat:47.322,lng:5.041,t:4},
+  {n:"Montpellier",lat:43.611,lng:3.877,t:4},{n:"Rennes",lat:48.117,lng:-1.678,t:4},
+  {n:"Liège",lat:50.633,lng:5.568,t:4},{n:"Ghent",lat:51.054,lng:3.725,t:4},
+  {n:"Utrecht",lat:52.091,lng:5.122,t:4},{n:"Groningen",lat:53.219,lng:6.567,t:4},
+  {n:"Eindhoven",lat:51.442,lng:5.470,t:4},{n:"Aarhus",lat:56.163,lng:10.203,t:4},
+  {n:"Bergen",lat:60.393,lng:5.324,t:4},{n:"Trondheim",lat:63.431,lng:10.395,t:4},
+  {n:"Tampere",lat:61.498,lng:23.761,t:4},{n:"Turku",lat:60.451,lng:22.267,t:4},
+  {n:"Cork",lat:51.897,lng:-8.470,t:4},{n:"Bristol",lat:51.455,lng:-2.588,t:4},
+  {n:"Liverpool",lat:53.408,lng:-2.992,t:4},{n:"Glasgow",lat:55.864,lng:-4.252,t:4},
+  {n:"Verona",lat:45.438,lng:10.992,t:4},{n:"Bari",lat:41.126,lng:16.862,t:4},
+  {n:"Split",lat:43.509,lng:16.440,t:4},{n:"Novi Sad",lat:45.254,lng:19.843,t:4},
+  {n:"Varna",lat:43.214,lng:27.915,t:4},{n:"Izmir",lat:38.424,lng:27.143,t:4},
+  {n:"Lausanne",lat:46.520,lng:6.633,t:4},{n:"Kaunas",lat:54.898,lng:23.904,t:4},
+  {n:"Katowice",lat:50.265,lng:19.024,t:4},{n:"Lublin",lat:51.247,lng:22.568,t:4},
+  {n:"Szczecin",lat:53.429,lng:14.553,t:4},
+];
+
+// ── MAP INIT ───────────────────────────────────────────────────────────────
+const tileLayers = {
+  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution:'© OpenStreetMap © CARTO', maxZoom:19 }),
+  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap, SRTM © OpenTopoMap', maxZoom:17 }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'© Esri', maxZoom:19 })
+};
+let currentTile = tileLayers.dark;
+const map = L.map('map', { center:[48.5,12], zoom:5, zoomControl:true, layers:[currentTile] });
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let startLatLng = null, startMarker = null;
+let isoLayer = null, ringLayers = [], routeLines = [];
+let cityMarkers = [];
+let routeData = { d:{}, t:{}, g:{} };
+let abortCtrl = null;
+let travelMode = 'driving-car', osrmProfile = 'driving';
+
+// ── CITY MARKERS ───────────────────────────────────────────────────────────
+function dotIcon(color, size) {
+  return L.divIcon({ className:'', html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:1.5px solid rgba(255,255,255,0.5);box-shadow:0 0 5px rgba(0,0,0,0.6);"></div>`, iconSize:[size+3,size+3], iconAnchor:[(size+3)/2,(size+3)/2] });
+}
+const DIM_COLOR = '#3a3835';
+const REACH_COLOR = 'oklch(72% 0.18 185)';
+
+cities.forEach((c, i) => {
+  const m = L.marker([c.lat, c.lng], { icon: dotIcon(DIM_COLOR, c.t<=2?8:5), interactive:false, zIndexOffset:100-c.t*20 });
+  const tip = L.tooltip({ permanent:true, direction:'right', offset:[7,0], className:'city-label dim', interactive:false });
+  tip.setContent(c.n);
+  m.bindTooltip(tip);
+  cityMarkers.push(m);
+});
+
+function tierForZoom(z) {
+  if (z >= 9) return 4;
+  if (z >= 7) return 3;
+  if (z >= 6) return 2;
+  return 1;
+}
+
+function updateCityVisibility() {
+  const z = map.getZoom();
+  const maxTier = tierForZoom(z);
+  const dist = parseFloat(document.getElementById('km-slider').value);
+  const hasData = Object.keys(routeData.d).length > 0;
+
+  cities.forEach((c, i) => {
+    const m = cityMarkers[i];
+    const rd = routeData.d[i];
+    const reachable = startLatLng && hasData && rd > 0 && rd <= dist;
+    const visible = c.t <= maxTier || reachable;
+
+    if (visible) {
+      if (!map.hasLayer(m)) m.addTo(map);
+      if (reachable) {
+        const rt = routeData.t[i] || 0;
+        const h = Math.floor(rt/60), mn = rt%60;
+        m.setTooltipContent(`${c.n}  ${rd} km · ${h}h${mn>0?mn+'m':''}`);
+        m.setIcon(dotIcon(REACH_COLOR, c.t<=2?10:7));
+        m.setZIndexOffset(300);
+        const el = m.getTooltip()?.getElement();
+        if (el) el.className = 'leaflet-tooltip city-label reachable';
+      } else {
+        m.setTooltipContent(c.n);
+        m.setIcon(dotIcon(DIM_COLOR, c.t<=2?8:5));
+        m.setZIndexOffset(100-c.t*20);
+        const el = m.getTooltip()?.getElement();
+        if (el) el.className = 'leaflet-tooltip city-label dim';
+      }
+    } else {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    }
+  });
+}
+
+map.on('zoomend', updateCityVisibility);
+updateCityVisibility();
+
+// ── PLACE MARKER ──────────────────────────────────────────────────────────
+const originIcon = L.divIcon({
+  className:'',
+  html:'<div style="width:16px;height:16px;border-radius:50%;background:var(--accent);border:2.5px solid #fff;box-shadow:0 0 10px rgba(200,140,60,0.7);"></div>',
+  iconSize:[20,20], iconAnchor:[10,10]
+});
+
+function placeMarker(latlng) {
+  if (startMarker) map.removeLayer(startMarker);
+  startMarker = L.marker(latlng, { icon: originIcon, zIndexOffset: 500 }).addTo(map);
+  startLatLng = latlng;
+  document.getElementById('map-hint').style.display = 'none';
+  document.getElementById('go-btn').disabled = false;
+  setStatus('ready', `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`);
+}
+
+map.on('click', e => placeMarker(e.latlng));
+
+// ── SLIDER ────────────────────────────────────────────────────────────────
+const slider = document.getElementById('km-slider');
+const kmDisplay = document.getElementById('km-display');
+
+slider.addEventListener('input', () => {
+  kmDisplay.textContent = slider.value;
+  document.querySelectorAll('.km-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.km) === parseInt(slider.value)));
+  updateMetrics();
+  drawRoutes();
+  updateCityVisibility();
+});
+
+document.querySelectorAll('.km-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    slider.value = btn.dataset.km;
+    kmDisplay.textContent = btn.dataset.km;
+    document.querySelectorAll('.km-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateMetrics();
+    drawRoutes();
+    updateCityVisibility();
+  });
+});
+
+// ── TRAVEL MODE ───────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    travelMode = btn.dataset.mode;
+    osrmProfile = btn.dataset.osrm;
+  });
+});
+
+// ── SEARCH ────────────────────────────────────────────────────────────────
+let searchTimeout;
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  const q = searchInput.value.trim();
+  if (q.length < 3) { searchResults.style.display = 'none'; return; }
+  searchTimeout = setTimeout(() => doSearch(q), 380);
+});
+document.getElementById('search-btn').addEventListener('click', () => { const q = searchInput.value.trim(); if (q.length >= 3) doSearch(q); });
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { const q = searchInput.value.trim(); if (q.length >= 3) doSearch(q); } });
+
+async function doSearch(q) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`, { headers:{'Accept-Language':'en'} });
+    const data = await res.json();
+    if (!data.length) { searchResults.style.display = 'none'; return; }
+    searchResults.innerHTML = data.map((r,i) => `
+      <div class="sri" data-lat="${r.lat}" data-lon="${r.lon}">
+        <div class="pn">${r.display_name.split(',')[0]}</div>
+        <div class="pd">${r.display_name.split(',').slice(1,3).join(',').trim()}</div>
+      </div>`).join('');
+    searchResults.style.display = 'block';
+    searchResults.querySelectorAll('.sri').forEach(item => {
+      item.addEventListener('click', () => {
+        const latlng = L.latLng(parseFloat(item.dataset.lat), parseFloat(item.dataset.lon));
+        map.setView(latlng, 9);
+        placeMarker(latlng);
+        searchResults.style.display = 'none';
+        searchInput.value = item.querySelector('.pn').textContent;
+      });
+    });
+  } catch(e) { searchResults.style.display = 'none'; }
+}
+document.addEventListener('click', e => { if (!document.getElementById('search-wrap').contains(e.target)) searchResults.style.display = 'none'; });
+
+// ── STATUS ────────────────────────────────────────────────────────────────
+function setStatus(state, msg) {
+  document.getElementById('status-dot').className = 'status-dot ' + state;
+  document.getElementById('status-text').textContent = msg;
+}
+function setProgress(pct) { document.getElementById('progress-fill').style.width = pct + '%'; }
+
+// ── MAIN CALCULATE ────────────────────────────────────────────────────────
+document.getElementById('go-btn').addEventListener('click', runCalculation);
+
+async function runCalculation() {
+  if (!startLatLng) return;
+  const btn = document.getElementById('go-btn');
+  btn.classList.add('loading'); btn.disabled = true;
+  clearVisuals();
+  setProgress(0);
+
+  const km = parseFloat(slider.value);
+
+  // Step 1: Isochrone (Valhalla ≤150km, circle beyond)
+  setStatus('loading', 'Drawing reachable area…');
+  if (km <= 150) {
+    await fetchIsochrone(km);
+  }
+  setProgress(25);
+
+  // Step 2: OSRM table for city distances
+  setStatus('loading', 'Fetching city distances…');
+  await fetchOSRMTable();
+  setProgress(70);
+  updateMetrics();
+  updateCityVisibility();
+
+  // Step 3: Route geometries
+  setStatus('loading', 'Tracing routes…');
+  await fetchRouteGeometries(km);
+  setProgress(100);
+
+  setStatus('ready', `Reachable within ${km} km`);
+  document.getElementById('clear-btn').style.display = 'block';
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  setTimeout(() => setProgress(0), 800);
+}
+
+// ── ISOCHRONE ─────────────────────────────────────────────────────────────
+const valhallaCosting = { 'driving-car':'auto', 'cycling-regular':'bicycle', 'foot-walking':'pedestrian' };
+
+async function fetchIsochrone(km) {
+  try {
+    const steps = Math.min(4, km >= 20 ? 4 : 3);
+    const contours = Array.from({length:steps}, (_,i) => ({ distance: Math.round(km*(i+1)/steps*10)/10 }));
+    const body = { locations:[{lon:startLatLng.lng,lat:startLatLng.lat}], costing:valhallaCosting[travelMode]||'auto', contours, polygons:true, denoise:0.5, generalize:150 };
+    const res = await fetch('https://valhalla1.openstreetmap.de/isochrone', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    if (!res.ok) throw new Error('Valhalla error');
+    const geojson = await res.json();
+    renderIsochrone(geojson);
+  } catch(e) {
+    // Fallback to circle
+    renderCircle(km);
+  }
+}
+
+function renderIsochrone(geojson) {
+  const features = (geojson.features || []).sort((a,b) => (b.properties?.contour||0)-(a.properties?.contour||0));
+  if (!features.length) return;
+  let allBounds = null;
+  features.forEach((feat, idx) => {
+    const t = features.length > 1 ? idx / (features.length-1) : 0;
+    const layer = L.geoJSON(feat, { style:{ fillColor:tweaks.fillColor, fillOpacity:tweaks.fillOpacity*(0.3+0.7*(1-t)), color:tweaks.fillColor, weight:idx===0?2:0.5, opacity:idx===0?0.8:0.2 } }).addTo(map);
+    try { const b = layer.getBounds(); if(b.isValid()) allBounds = allBounds ? allBounds.extend(b) : b; } catch(e){}
+    if (idx===0) isoLayer = layer; else ringLayers.push(layer);
+  });
+  if (allBounds?.isValid()) map.fitBounds(allBounds, {padding:[40,40]});
+}
+
+function renderCircle(km) {
+  isoLayer = L.circle(startLatLng, { radius:km*1000, fillColor:tweaks.fillColor, fillOpacity:tweaks.fillOpacity, color:tweaks.fillColor, weight:2, opacity:0.8 }).addTo(map);
+  const b = isoLayer.getBounds();
+  if (b.isValid()) map.fitBounds(b, {padding:[40,40]});
+}
+
+// ── OSRM TABLE ────────────────────────────────────────────────────────────
+async function fetchOSRMTable() {
+  if (abortCtrl) abortCtrl.abort();
+  abortCtrl = new AbortController();
+  routeData = { d:{}, t:{}, g:{} };
+  try {
+    const coords = `${startLatLng.lng},${startLatLng.lat};` + cities.map(c=>`${c.lng},${c.lat}`).join(';');
+    const res = await fetch(`https://router.project-osrm.org/table/v1/${osrmProfile}/${coords}?sources=0&annotations=distance,duration`, { signal:abortCtrl.signal });
+    const data = await res.json();
+    if (data.code === 'Ok') {
+      cities.forEach((_,i) => {
+        routeData.d[i] = Math.round((data.distances[0][i+1]||0)/1000);
+        routeData.t[i] = Math.round((data.durations[0][i+1]||0)/60);
+      });
+    }
+  } catch(e) { /* ignore abort */ }
+}
+
+// ── POLYLINE DECODE ───────────────────────────────────────────────────────
+function decodePoly(str) {
+  let i=0,lat=0,lng=0; const c=[];
+  while(i<str.length){
+    let b,s=0,r=0; do{b=str.charCodeAt(i++)-63;r|=(b&31)<<s;s+=5}while(b>=32);
+    lat+=r&1?~(r>>1):r>>1; s=0;r=0;
+    do{b=str.charCodeAt(i++)-63;r|=(b&31)<<s;s+=5}while(b>=32);
+    lng+=r&1?~(r>>1):r>>1; c.push([lat/1e5,lng/1e5]);
+  }
+  return c;
+}
+
+// ── ROUTE GEOMETRIES ──────────────────────────────────────────────────────
+async function fetchRouteGeometries(km) {
+  if (!tweaks.showRoutes) return;
+  const sig = abortCtrl?.signal;
+  const reachable = cities.map((c,i)=>({i,d:routeData.d[i]||Infinity}))
+    .filter(x=>x.d<=km&&x.d>0).sort((a,b)=>a.d-b.d);
+
+  for (let b=0; b<reachable.length; b+=6) {
+    const chunk = reachable.slice(b, b+6);
+    await Promise.all(chunk.map(async r => {
+      try {
+        const c = cities[r.i];
+        const res = await fetch(`https://router.project-osrm.org/route/v1/${osrmProfile}/${startLatLng.lng},${startLatLng.lat};${c.lng},${c.lat}?overview=full&geometries=polyline`, { signal:sig });
+        const data = await res.json();
+        if (data.code==='Ok' && data.routes[0]) {
+          routeData.g[r.i] = decodePoly(data.routes[0].geometry);
+          routeData.d[r.i] = Math.round(data.routes[0].distance/1000);
+          routeData.t[r.i] = Math.round(data.routes[0].duration/60);
+        }
+      } catch(e) { if(e?.name==='AbortError') throw e; }
+    })).catch(()=>{});
+    drawRoutes();
+    updateMetrics();
+    updateCityVisibility();
+    await new Promise(r=>setTimeout(r,60));
+  }
+}
+
+// ── DRAW ROUTES ───────────────────────────────────────────────────────────
+function drawRoutes() {
+  routeLines.forEach(l=>map.removeLayer(l));
+  routeLines=[];
+  if (!tweaks.showRoutes) return;
+  const dist = parseFloat(slider.value);
+  Object.keys(routeData.g).forEach(idx => {
+    const d = routeData.d[idx]||Infinity, geo = routeData.g[idx];
+    if (!geo||geo.length<2) return;
+    const reachable = d <= dist;
+    const glowColor = reachable ? tweaks.fillColor : '#3a3835';
+    const lineColor = reachable ? tweaks.fillColor : '#3a3835';
+    const glow = L.polyline(geo, { color:glowColor, weight:reachable?8:3, opacity:reachable?0.12:0.05, interactive:false }).addTo(map);
+    const line = L.polyline(geo, { color:lineColor, weight:reachable?2:1, opacity:reachable?0.65:0.12, interactive:false }).addTo(map);
+    routeLines.push(glow, line);
+  });
+}
+
+// ── METRICS ───────────────────────────────────────────────────────────────
+function updateMetrics() {
+  const dist = parseFloat(slider.value);
+  const hasData = Object.keys(routeData.d).length > 0;
+  if (!startLatLng || !hasData) { ['m-cities','m-farthest','m-time'].forEach(id=>{document.getElementById(id).textContent='—';}); return; }
+  let count=0, farthestTime=0, farthestDist=0;
+  cities.forEach((_,i) => {
+    const d=routeData.d[i]||Infinity, t=routeData.t[i]||0;
+    if(d<=dist&&d>0){count++;if(t>farthestTime){farthestTime=t;farthestDist=d;}}
+  });
+  document.getElementById('m-cities').textContent = count || '—';
+  document.getElementById('m-farthest').textContent = farthestDist ? farthestDist+' km' : '—';
+  if (farthestTime > 0) {
+    const h=Math.floor(farthestTime/60),m=farthestTime%60;
+    document.getElementById('m-time').textContent = `${h}h${m>0?' '+m+'m':''}`;
+  } else {
+    document.getElementById('m-time').textContent = '—';
+  }
+}
+
+// ── CLEAR ────────────────────────────────────────────────────────────────
+function clearVisuals() {
+  if (isoLayer) { map.removeLayer(isoLayer); isoLayer=null; }
+  ringLayers.forEach(l=>map.removeLayer(l)); ringLayers=[];
+  routeLines.forEach(l=>map.removeLayer(l)); routeLines=[];
+}
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  clearVisuals();
+  if (startMarker) { map.removeLayer(startMarker); startMarker=null; }
+  startLatLng=null;
+  routeData={d:{},t:{},g:{}};
+  document.getElementById('clear-btn').style.display='none';
+  document.getElementById('map-hint').style.display='block';
+  document.getElementById('go-btn').disabled=true;
+  setStatus('','Set a starting point to begin');
+  updateMetrics();
+  updateCityVisibility();
+});
+
+// ── TWEAKS ────────────────────────────────────────────────────────────────
+window.addEventListener('message', e => {
+  if (e.data?.type==='__activate_edit_mode') document.getElementById('tweaks-panel').style.display='block';
+  else if (e.data?.type==='__deactivate_edit_mode') document.getElementById('tweaks-panel').style.display='none';
+});
+window.parent.postMessage({type:'__edit_mode_available'},'*');
+
+document.getElementById('tw-fill').addEventListener('input', function() {
+  tweaks.fillColor=this.value; applyTweakStyle();
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{fillColor:this.value}},'*');
+});
+document.getElementById('tw-opacity').addEventListener('input', function() {
+  tweaks.fillOpacity=parseFloat(this.value); applyTweakStyle();
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{fillOpacity:tweaks.fillOpacity}},'*');
+});
+document.getElementById('tw-map-style').addEventListener('change', function() {
+  tweaks.mapStyle=this.value;
+  map.removeLayer(currentTile); currentTile=tileLayers[tweaks.mapStyle]||tileLayers.dark; currentTile.addTo(map);
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{mapStyle:this.value}},'*');
+});
+document.getElementById('tw-routes').addEventListener('change', function() {
+  tweaks.showRoutes=this.value==='1'; drawRoutes();
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{showRoutes:tweaks.showRoutes}},'*');
+});
+function applyTweakStyle() {
+  [isoLayer,...ringLayers].forEach(l=>{if(l&&l.setStyle)l.setStyle({fillColor:tweaks.fillColor,color:tweaks.fillColor,fillOpacity:tweaks.fillOpacity});});
+  drawRoutes();
+}
+
+// Init tweak controls
+document.getElementById('tw-fill').value=TWEAK_DEFAULTS.fillColor;
+document.getElementById('tw-opacity').value=TWEAK_DEFAULTS.fillOpacity;
+document.getElementById('tw-map-style').value=TWEAK_DEFAULTS.mapStyle;
+document.getElementById('tw-routes').value=TWEAK_DEFAULTS.showRoutes?'1':'0';
+</script>
+</body>
+</html>
