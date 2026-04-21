@@ -434,13 +434,178 @@ const cities = [
   {n:"Bergen",lat:60.393,lng:5.324,t:4},{n:"Trondheim",lat:63.431,lng:10.395,t:4},
   {n:"Tampere",lat:61.498,lng:23.761,t:4},{n:"Turku",lat:60.451,lng:22.267,t:4},
   {n:"Cork",lat:51.897,lng:-8.470,t:4},{n:"Bristol",lat:51.455,lng:-2.588,t:4},
-  {n:"Liverpool",lat:53.408,lng:-2.992,t:4},{n:"Glasgow",lat:55.864,lng:-4.252,t:4},
+  {n:"Liverpool",lat:53.408,lng:-2.992,t:4},
   {n:"Verona",lat:45.438,lng:10.992,t:4},{n:"Bari",lat:41.126,lng:16.862,t:4},
   {n:"Split",lat:43.509,lng:16.440,t:4},{n:"Novi Sad",lat:45.254,lng:19.843,t:4},
   {n:"Varna",lat:43.214,lng:27.915,t:4},{n:"Izmir",lat:38.424,lng:27.143,t:4},
   {n:"Lausanne",lat:46.520,lng:6.633,t:4},{n:"Kaunas",lat:54.898,lng:23.904,t:4},
   {n:"Katowice",lat:50.265,lng:19.024,t:4},{n:"Lublin",lat:51.247,lng:22.568,t:4},
   {n:"Szczecin",lat:53.429,lng:14.553,t:4},
+  // T5 — Towns (visible only when zoomed in close)
+  // Hungary
+  {n:"Dunaújváros",lat:46.981,lng:18.935,t:5},{n:"Szolnok",lat:47.176,lng:20.190,t:5},
+  {n:"Tiszaújváros",lat:47.921,lng:21.073,t:5},{n:"Ajka",lat:47.100,lng:17.555,t:5},
+  {n:"Pápa",lat:47.330,lng:17.469,t:5},{n:"Zalaegerszeg",lat:46.842,lng:16.843,t:5},
+  {n:"Nagykanizsa",lat:46.459,lng:16.990,t:5},{n:"Siófok",lat:46.908,lng:18.055,t:5},
+  {n:"Balatonföldvár",lat:46.853,lng:17.904,t:5},{n:"Keszthely",lat:46.773,lng:17.248,t:5},
+  {n:"Balatonfüred",lat:46.956,lng:17.888,t:5},{n:"Vác",lat:47.775,lng:19.133,t:5},
+  {n:"Esztergom",lat:47.793,lng:18.742,t:5},{n:"Szentendre",lat:47.670,lng:19.074,t:5},
+  {n:"Visegrád",lat:47.788,lng:18.979,t:5},{n:"Budaörs",lat:47.451,lng:18.952,t:5},
+  {n:"Érd",lat:47.390,lng:18.913,t:5},{n:"Dunakeszi",lat:47.627,lng:19.136,t:5},
+  {n:"Gödöllő",lat:47.598,lng:19.360,t:5},{n:"Vecsés",lat:47.410,lng:19.268,t:5},
+  {n:"Cegléd",lat:47.170,lng:19.804,t:5},{n:"Nagykőrös",lat:47.035,lng:19.782,t:5},
+  {n:"Kiskunfélegyháza",lat:46.711,lng:19.849,t:5},{n:"Baja",lat:46.179,lng:18.958,t:5},
+  {n:"Mohács",lat:45.993,lng:18.682,t:5},{n:"Bonyhád",lat:46.301,lng:18.530,t:5},
+  {n:"Dombóvár",lat:46.378,lng:18.136,t:5},{n:"Marcali",lat:46.584,lng:17.408,t:5},
+  {n:"Komárom",lat:47.743,lng:18.128,t:5},
+  {n:"Oroszlány",lat:47.489,lng:18.317,t:5},{n:"Mór",lat:47.374,lng:18.205,t:5},
+  {n:"Várpalota",lat:47.197,lng:18.137,t:5},{n:"Sárbogárd",lat:46.882,lng:18.612,t:5},
+  {n:"Dunavecse",lat:46.925,lng:18.966,t:5},{n:"Paks",lat:46.628,lng:18.856,t:5},
+  {n:"Tolna",lat:46.424,lng:18.789,t:5},{n:"Szekszárd",lat:46.348,lng:18.707,t:5},
+  {n:"Hőgyész",lat:46.424,lng:18.423,t:5},{n:"Tamási",lat:46.632,lng:18.286,t:5},
+  {n:"Tab",lat:46.737,lng:17.904,t:5},{n:"Fonyód",lat:46.751,lng:17.558,t:5},
+  {n:"Barcs",lat:45.962,lng:17.461,t:5},
+  {n:"Szigetvár",lat:46.046,lng:17.800,t:5},{n:"Sellye",lat:45.869,lng:17.843,t:5},
+  {n:"Siklós",lat:45.856,lng:18.296,t:5},{n:"Villány",lat:45.864,lng:18.453,t:5},
+  {n:"Harkány",lat:45.857,lng:18.232,t:5},{n:"Komló",lat:46.191,lng:18.262,t:5},
+  {n:"Pécsvárad",lat:46.155,lng:18.415,t:5},{n:"Gyönk",lat:46.644,lng:18.494,t:5},
+  {n:"Ozora",lat:46.645,lng:18.402,t:5},{n:"Sárospatak",lat:48.321,lng:21.567,t:5},
+  {n:"Sátoraljaújhely",lat:48.393,lng:21.658,t:5},{n:"Kisvárda",lat:48.223,lng:22.090,t:5},
+  {n:"Mátészalka",lat:47.950,lng:22.321,t:5},{n:"Fehérgyarmat",lat:47.990,lng:22.523,t:5},
+  {n:"Vásárosnamény",lat:48.122,lng:22.316,t:5},{n:"Záhony",lat:48.404,lng:22.186,t:5},
+  {n:"Berettyóújfalu",lat:47.218,lng:21.541,t:5},{n:"Püspökladány",lat:47.318,lng:21.118,t:5},
+  {n:"Hajdúböszörmény",lat:47.666,lng:21.523,t:5},{n:"Hajdúszoboszló",lat:47.449,lng:21.397,t:5},
+  {n:"Tiszafüred",lat:47.614,lng:20.762,t:5},{n:"Jászberény",lat:47.500,lng:19.914,t:5},
+  {n:"Hatvan",lat:47.667,lng:19.682,t:5},{n:"Gyöngyös",lat:47.783,lng:19.932,t:5},
+  {n:"Heves",lat:47.598,lng:20.282,t:5},{n:"Füzesabony",lat:47.750,lng:20.423,t:5},
+  {n:"Mezőkövesd",lat:47.812,lng:20.572,t:5},{n:"Ózd",lat:48.220,lng:20.294,t:5},
+  {n:"Kazincbarcika",lat:48.252,lng:20.637,t:5},{n:"Szerencs",lat:48.166,lng:21.200,t:5},
+  {n:"Tállya",lat:48.225,lng:21.348,t:5},{n:"Tokaj",lat:48.119,lng:21.411,t:5},
+  {n:"Nyírbátor",lat:47.836,lng:22.130,t:5},{n:"Balkány",lat:47.773,lng:21.866,t:5},
+  {n:"Rohod",lat:47.893,lng:22.154,t:5},{n:"Kemecse",lat:47.916,lng:21.834,t:5},
+  // Austria
+  {n:"St. Pölten",lat:48.204,lng:15.626,t:5},{n:"Wiener Neustadt",lat:47.813,lng:16.244,t:5},
+  {n:"Baden",lat:48.006,lng:16.236,t:5},{n:"Klosterneuburg",lat:48.305,lng:16.329,t:5},
+  {n:"Tulln",lat:48.330,lng:15.998,t:5},{n:"Krems",lat:48.409,lng:15.615,t:5},
+  {n:"Wels",lat:48.157,lng:14.024,t:5},{n:"Steyr",lat:48.043,lng:14.421,t:5},
+  {n:"Eisenstadt",lat:47.845,lng:16.524,t:5},{n:"Klagenfurt",lat:46.622,lng:14.308,t:5},
+  {n:"Villach",lat:46.611,lng:13.848,t:5},{n:"Bruck an der Mur",lat:47.413,lng:15.269,t:5},
+  {n:"Leoben",lat:47.384,lng:15.094,t:5},{n:"Wolfsberg",lat:46.841,lng:14.843,t:5},
+  // Slovakia
+  {n:"Trnava",lat:48.378,lng:17.588,t:5},{n:"Nitra",lat:48.307,lng:18.085,t:5},
+  {n:"Banská Bystrica",lat:48.736,lng:19.146,t:5},{n:"Prešov",lat:48.999,lng:21.239,t:5},
+  {n:"Trenčín",lat:48.895,lng:18.044,t:5},{n:"Martin",lat:49.066,lng:18.921,t:5},
+  {n:"Poprad",lat:49.060,lng:20.298,t:5},{n:"Liptovský Mikuláš",lat:49.083,lng:19.613,t:5},
+  {n:"Spišská Nová Ves",lat:48.945,lng:20.568,t:5},{n:"Zvolen",lat:48.576,lng:19.121,t:5},
+  {n:"Ružomberok",lat:49.075,lng:19.305,t:5},{n:"Michalovce",lat:48.755,lng:21.921,t:5},
+  {n:"Humenne",lat:48.934,lng:21.906,t:5},{n:"Bardejov",lat:49.294,lng:21.278,t:5},
+  {n:"Senica",lat:48.680,lng:17.366,t:5},{n:"Piešťany",lat:48.589,lng:17.833,t:5},
+  // Croatia
+  {n:"Osijek",lat:45.551,lng:18.695,t:5},{n:"Varaždin",lat:46.305,lng:16.337,t:5},
+  {n:"Karlovac",lat:45.487,lng:15.547,t:5},{n:"Slavonski Brod",lat:45.161,lng:18.012,t:5},
+  {n:"Pula",lat:44.868,lng:13.848,t:5},{n:"Zadar",lat:44.119,lng:15.232,t:5},
+  {n:"Šibenik",lat:43.735,lng:15.893,t:5},{n:"Bjelovar",lat:45.896,lng:16.849,t:5},
+  {n:"Sisak",lat:45.488,lng:16.378,t:5},{n:"Koprivnica",lat:46.162,lng:16.828,t:5},
+  {n:"Čakovec",lat:46.384,lng:16.433,t:5},{n:"Vinkovci",lat:45.289,lng:18.804,t:5},
+  {n:"Vukovar",lat:45.351,lng:19.001,t:5},{n:"Požega",lat:45.340,lng:17.685,t:5},
+  // Slovenia
+  {n:"Kranj",lat:46.239,lng:14.356,t:5},{n:"Celje",lat:46.231,lng:15.268,t:5},
+  {n:"Velenje",lat:46.359,lng:15.110,t:5},{n:"Novo Mesto",lat:45.801,lng:15.168,t:5},
+  {n:"Koper",lat:45.548,lng:13.729,t:5},{n:"Nova Gorica",lat:45.958,lng:13.642,t:5},
+  {n:"Murska Sobota",lat:46.664,lng:16.166,t:5},{n:"Ptuj",lat:46.420,lng:15.869,t:5},
+  // Romania
+  {n:"Arad",lat:46.177,lng:21.321,t:5},{n:"Oradea",lat:47.046,lng:21.918,t:5},
+  {n:"Satu Mare",lat:47.792,lng:22.885,t:5},{n:"Baia Mare",lat:47.657,lng:23.568,t:5},
+  {n:"Deva",lat:45.879,lng:22.912,t:5},{n:"Hunedoara",lat:45.716,lng:22.909,t:5},
+  {n:"Alba Iulia",lat:46.074,lng:23.580,t:5},{n:"Sibiu",lat:45.791,lng:24.152,t:5},
+  {n:"Brașov",lat:45.657,lng:25.601,t:5},{n:"Ploiești",lat:44.945,lng:26.024,t:5},
+  {n:"Galați",lat:45.436,lng:28.050,t:5},{n:"Brăila",lat:45.274,lng:27.959,t:5},
+  {n:"Buzău",lat:45.150,lng:26.820,t:5},{n:"Pitești",lat:44.860,lng:24.869,t:5},
+  {n:"Craiova",lat:44.319,lng:23.801,t:5},{n:"Râmnicu Vâlcea",lat:45.100,lng:24.369,t:5},
+  {n:"Târgu Mureș",lat:46.541,lng:24.557,t:5},{n:"Bistrița",lat:47.131,lng:24.486,t:5},
+  {n:"Zalău",lat:47.193,lng:23.055,t:5},{n:"Drobeta-Turnu Severin",lat:44.629,lng:22.655,t:5},
+  {n:"Reșița",lat:45.302,lng:21.889,t:5},{n:"Caransebeș",lat:45.418,lng:22.218,t:5},
+  // Serbia
+  {n:"Kragujevac",lat:44.013,lng:20.928,t:5},{n:"Subotica",lat:46.100,lng:19.665,t:5},
+  {n:"Zrenjanin",lat:45.382,lng:20.390,t:5},{n:"Pančevo",lat:44.871,lng:20.641,t:5},
+  {n:"Čačak",lat:43.892,lng:20.349,t:5},{n:"Kruševac",lat:43.579,lng:21.325,t:5},
+  {n:"Kraljevo",lat:43.724,lng:20.689,t:5},{n:"Smederevo",lat:44.664,lng:20.929,t:5},
+  {n:"Valjevo",lat:44.274,lng:19.887,t:5},{n:"Šabac",lat:44.754,lng:19.691,t:5},
+  {n:"Novi Pazar",lat:43.137,lng:20.512,t:5},{n:"Leskovac",lat:42.998,lng:21.946,t:5},
+  {n:"Vranje",lat:42.551,lng:21.900,t:5},{n:"Pirot",lat:43.155,lng:22.586,t:5},
+  {n:"Zaječar",lat:43.905,lng:22.273,t:5},{n:"Bor",lat:44.072,lng:22.099,t:5},
+  // Czech Republic
+  {n:"České Budějovice",lat:48.975,lng:14.475,t:5},{n:"Liberec",lat:50.770,lng:15.057,t:5},
+  {n:"Hradec Králové",lat:50.210,lng:15.832,t:5},{n:"Pardubice",lat:50.037,lng:15.779,t:5},
+  {n:"Olomouc",lat:49.594,lng:17.251,t:5},{n:"Zlín",lat:49.227,lng:17.662,t:5},
+  {n:"Jihlava",lat:49.397,lng:15.591,t:5},{n:"Havířov",lat:49.779,lng:18.433,t:5},
+  {n:"Kladno",lat:50.148,lng:14.104,t:5},{n:"Most",lat:50.502,lng:13.637,t:5},
+  {n:"Opava",lat:49.938,lng:17.904,t:5},{n:"Frýdek-Místek",lat:49.682,lng:18.351,t:5},
+  // Poland
+  {n:"Białystok",lat:53.133,lng:23.168,t:5},{n:"Rzeszów",lat:50.041,lng:22.005,t:5},
+  {n:"Bielsko-Biała",lat:49.822,lng:19.044,t:5},{n:"Radom",lat:51.403,lng:21.147,t:5},
+  {n:"Kielce",lat:50.866,lng:20.628,t:5},{n:"Toruń",lat:53.014,lng:18.598,t:5},
+  {n:"Gorzów Wlkp.",lat:52.735,lng:15.228,t:5},{n:"Zielona Góra",lat:51.935,lng:15.506,t:5},
+  {n:"Bydgoszcz",lat:53.123,lng:18.008,t:5},{n:"Opole",lat:50.668,lng:17.927,t:5},
+  {n:"Częstochowa",lat:50.813,lng:19.120,t:5},{n:"Rybnik",lat:50.097,lng:18.541,t:5},
+  {n:"Sosnowiec",lat:50.286,lng:19.104,t:5},{n:"Bytom",lat:50.348,lng:18.918,t:5},
+  {n:"Gliwice",lat:50.294,lng:18.666,t:5},{n:"Zabrze",lat:50.325,lng:18.786,t:5},
+  // Germany (extra)
+  {n:"Würzburg",lat:49.792,lng:9.932,t:5},{n:"Ulm",lat:48.401,lng:9.997,t:5},
+  {n:"Karlsruhe",lat:49.006,lng:8.404,t:5},{n:"Heidelberg",lat:49.399,lng:8.673,t:5},
+  {n:"Wiesbaden",lat:50.082,lng:8.240,t:5},{n:"Kassel",lat:51.312,lng:9.480,t:5},
+  {n:"Braunschweig",lat:52.268,lng:10.527,t:5},{n:"Magdeburg",lat:52.130,lng:11.628,t:5},
+  {n:"Halle",lat:51.483,lng:11.970,t:5},{n:"Potsdam",lat:52.390,lng:13.065,t:5},
+  {n:"Münster",lat:51.961,lng:7.628,t:5},{n:"Bielefeld",lat:52.021,lng:8.532,t:5},
+  {n:"Paderborn",lat:51.719,lng:8.754,t:5},{n:"Siegen",lat:50.875,lng:8.024,t:5},
+  {n:"Saarbrücken",lat:49.235,lng:7.001,t:5},{n:"Kaiserslautern",lat:49.444,lng:7.769,t:5},
+  {n:"Trier",lat:49.749,lng:6.638,t:5},{n:"Koblenz",lat:50.360,lng:7.597,t:5},
+  {n:"Darmstadt",lat:49.872,lng:8.651,t:5},{n:"Offenburg",lat:48.473,lng:7.940,t:5},
+  {n:"Konstanz",lat:47.663,lng:9.175,t:5},{n:"Passau",lat:48.575,lng:13.455,t:5},
+  {n:"Ingolstadt",lat:48.763,lng:11.426,t:5},{n:"Bamberg",lat:49.900,lng:10.902,t:5},
+  {n:"Bayreuth",lat:49.945,lng:11.578,t:5},{n:"Hof",lat:50.315,lng:11.913,t:5},
+  {n:"Chemnitz",lat:50.833,lng:12.917,t:5},{n:"Zwickau",lat:50.718,lng:12.497,t:5},
+  {n:"Görlitz",lat:51.155,lng:14.987,t:5},{n:"Cottbus",lat:51.762,lng:14.334,t:5},
+  {n:"Frankfurt (Oder)",lat:52.343,lng:14.551,t:5},{n:"Schwerin",lat:53.629,lng:11.417,t:5},
+  // Italy (extra)
+  {n:"Trieste",lat:45.649,lng:13.776,t:5},{n:"Udine",lat:46.063,lng:13.235,t:5},
+  {n:"Treviso",lat:45.667,lng:12.242,t:5},{n:"Vicenza",lat:45.546,lng:11.545,t:5},
+  {n:"Brescia",lat:45.542,lng:10.218,t:5},{n:"Bergamo",lat:45.695,lng:9.670,t:5},
+  {n:"Cremona",lat:45.133,lng:10.022,t:5},{n:"Mantua",lat:45.156,lng:10.791,t:5},
+  {n:"Parma",lat:44.801,lng:10.328,t:5},{n:"Modena",lat:44.647,lng:10.925,t:5},
+  {n:"Ferrara",lat:44.836,lng:11.619,t:5},{n:"Ravenna",lat:44.418,lng:12.203,t:5},
+  {n:"Rimini",lat:44.059,lng:12.567,t:5},{n:"Ancona",lat:43.616,lng:13.516,t:5},
+  {n:"Perugia",lat:43.110,lng:12.389,t:5},{n:"Livorno",lat:43.548,lng:10.310,t:5},
+  {n:"Trento",lat:46.070,lng:11.121,t:5},{n:"Bolzano",lat:46.499,lng:11.356,t:5},
+  // France (extra)
+  {n:"Metz",lat:49.119,lng:6.177,t:5},{n:"Nancy",lat:48.693,lng:6.184,t:5},
+  {n:"Reims",lat:49.258,lng:4.032,t:5},{n:"Amiens",lat:49.894,lng:2.302,t:5},
+  {n:"Caen",lat:49.183,lng:-0.371,t:5},{n:"Le Havre",lat:49.494,lng:0.107,t:5},
+  {n:"Tours",lat:47.394,lng:0.690,t:5},{n:"Orléans",lat:47.903,lng:1.909,t:5},
+  {n:"Limoges",lat:45.834,lng:1.261,t:5},{n:"Grenoble",lat:45.188,lng:5.724,t:5},
+  {n:"Besançon",lat:47.238,lng:6.024,t:5},{n:"Mulhouse",lat:47.750,lng:7.340,t:5},
+  {n:"Perpignan",lat:42.699,lng:2.895,t:5},{n:"Toulon",lat:43.124,lng:5.928,t:5},
+  // Switzerland (extra)
+  {n:"St. Gallen",lat:47.424,lng:9.377,t:5},{n:"Winterthur",lat:47.500,lng:8.724,t:5},
+  {n:"Lucerne",lat:47.050,lng:8.310,t:5},{n:"Thun",lat:46.758,lng:7.629,t:5},
+  {n:"Sion",lat:46.233,lng:7.360,t:5},{n:"Fribourg",lat:46.806,lng:7.152,t:5},
+  {n:"Schaffhausen",lat:47.697,lng:8.634,t:5},{n:"Chur",lat:46.850,lng:9.533,t:5},
+  // Greece
+  {n:"Patras",lat:38.246,lng:21.734,t:5},{n:"Larissa",lat:39.639,lng:22.419,t:5},
+  {n:"Heraklion",lat:35.339,lng:25.133,t:5},{n:"Volos",lat:39.360,lng:22.942,t:5},
+  {n:"Ioannina",lat:39.665,lng:20.853,t:5},{n:"Kavala",lat:40.939,lng:24.402,t:5},
+  {n:"Chania",lat:35.513,lng:24.018,t:5},{n:"Agrinio",lat:38.621,lng:21.408,t:5},
+  {n:"Kalamata",lat:37.038,lng:22.114,t:5},{n:"Alexandroupoli",lat:40.849,lng:25.874,t:5},
+  {n:"Serres",lat:41.086,lng:23.548,t:5},{n:"Drama",lat:41.150,lng:24.149,t:5},
+  {n:"Katerini",lat:40.272,lng:22.503,t:5},{n:"Trikala",lat:39.554,lng:21.768,t:5},
+  {n:"Lamia",lat:38.899,lng:22.434,t:5},{n:"Chalcis",lat:38.463,lng:23.600,t:5},
+  {n:"Kozani",lat:40.301,lng:21.788,t:5},{n:"Veria",lat:40.523,lng:22.203,t:5},
+  {n:"Corinth",lat:37.939,lng:22.928,t:5},{n:"Tripoli",lat:37.510,lng:22.379,t:5},
+  {n:"Rhodes",lat:36.434,lng:28.217,t:5},{n:"Komotini",lat:41.122,lng:25.404,t:5},
+  {n:"Xanthi",lat:41.135,lng:24.888,t:5},{n:"Florina",lat:40.778,lng:21.408,t:5},
+  {n:"Sparti",lat:37.074,lng:22.430,t:5},{n:"Pyrgos",lat:37.675,lng:21.440,t:5},
+  {n:"Preveza",lat:38.959,lng:20.752,t:5},{n:"Lefkada",lat:38.834,lng:20.706,t:5},
+  {n:"Argos",lat:37.631,lng:22.720,t:5},{n:"Nafplio",lat:37.568,lng:22.800,t:5},
 ];
 
 // ── MAP INIT ───────────────────────────────────────────────────────────────
@@ -477,10 +642,16 @@ cities.forEach((c, i) => {
 });
 
 function tierForZoom(z) {
-  if (z >= 9) return 4;
-  if (z >= 7) return 3;
-  if (z >= 6) return 2;
+  if (z >= 11) return 5;
+  if (z >= 9)  return 4;
+  if (z >= 8)  return 3;
+  if (z >= 7)  return 2;
   return 1;
+}
+
+function dotSizeForTier(t, z) {
+  const base = t <= 1 ? 8 : t <= 2 ? 6 : t <= 3 ? 5 : t <= 4 ? 4 : 3;
+  return base;
 }
 
 function updateCityVisibility() {
@@ -514,13 +685,19 @@ function updateCityVisibility() {
         m.setIcon(dotIcon(REACH_COLOR(), c.t<=2?10:7));
         m.setZIndexOffset(300);
         const el = m.getTooltip()?.getElement();
-        if (el) el.className = 'leaflet-tooltip city-label reachable';
+        if (el) {
+          el.className = 'leaflet-tooltip city-label reachable';
+          el.style.display = z >= 6 ? '' : 'none';
+        }
       } else {
         m.setTooltipContent(c.n);
         m.setIcon(dotIcon(DIM_COLOR(), c.t<=2?8:5));
         m.setZIndexOffset(100-c.t*20);
         const el = m.getTooltip()?.getElement();
-        if (el) el.className = 'leaflet-tooltip city-label dim';
+        if (el) {
+          el.className = 'leaflet-tooltip city-label dim';
+          el.style.display = z >= 7 ? '' : 'none';
+        }
       }
     } else {
       if (map.hasLayer(m)) map.removeLayer(m);
