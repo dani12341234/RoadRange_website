@@ -1112,6 +1112,23 @@ document.getElementById('tw-opacity').value=TWEAK_DEFAULTS.fillOpacity;
 document.getElementById('tw-map-style').value=TWEAK_DEFAULTS.mapStyle;
 document.getElementById('tw-routes').value=TWEAK_DEFAULTS.showRoutes?'1':'0';
 
+// Default address — use the user's current location
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+    map.setView(latlng, 11);
+    placeMarker(latlng);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`, {headers:{'Accept-Language':'en'}});
+      const data = await res.json();
+      if (data?.display_name) {
+        const parts = data.display_name.split(',').map(s => s.trim());
+        searchInput.value = parts.slice(0, 3).join(', ');
+      }
+    } catch(e) {}
+    runCalculation();
+  }, () => {}, { enableHighAccuracy:false, timeout:8000, maximumAge:5*60*1000 });
+}
 // Default address
 (async () => {
   try {
